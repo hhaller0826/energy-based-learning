@@ -1,19 +1,20 @@
-import torch 
 import math
 from helpers import *
 
 class JaynesMachine:
+    # TODO: implement Jaynes machine that can go through layer-by-layer
     def __init__(self, weights):
         self.W = weights
 
-class JaynesMachineLayer:
+# TODO: Jaynes Neuronal Layer
+
+class JaynesConnectionLayer:
     def __init__(self, weights, num_bins):
         self.W = weights
         self.M_l = len(weights)
         self.m = num_bins
         self.bins = bin_values(weights, num_bins)
         
-
     def potential(self, utility_scale, disutility_scale):
         '''
         Args: 
