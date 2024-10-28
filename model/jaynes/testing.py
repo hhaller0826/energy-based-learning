@@ -1,4 +1,5 @@
 import numpy as np 
+from energy import *
 
 # I asked ChatGPT to code eq prop lol 
 # might be good for basic testing
@@ -53,16 +54,25 @@ class SimpleNeuralNetwork:
 
 # Example usage
 if __name__ == "__main__":
-    # Create a dataset (X, target)
-    X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])  # Example input
-    target = np.array([[0], [1], [1], [0]])          # XOR problem
+    # # Create a dataset (X, target)
+    # X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])  # Example input
+    # target = np.array([[0], [1], [1], [0]])          # XOR problem
 
-    # Initialize and train the network
-    nn = SimpleNeuralNetwork(input_size=2, hidden_size=2, output_size=1)
-    nn.equilibrium_propagation(X, target, iterations=1000)
+    # # Initialize and train the network
+    # nn = SimpleNeuralNetwork(input_size=2, hidden_size=2, output_size=1)
+    # nn.equilibrium_propagation(X, target, iterations=1000)
 
-    # Test the network
-    print("Outputs after training:")
-    for x in X:
-        output = nn.forward(x.reshape(1, -1))
-        print(f"Input: {x} => Output: {output}")
+    # # Test the network
+    # print("Outputs after training:")
+    # for x in X:
+    #     output = nn.forward(x.reshape(1, -1))
+    #     print(f"Input: {x} => Output: {output}")
+
+    sample_weights = np.random.uniform(low=0.0, high=1.0, size=(100,))
+    print(sample_weights.sort())
+
+    # NOTE: You need to import matplotlib
+    connection_layer = JaynesConnectionLayer(sample_weights, 10)
+    connection_layer.test_print(1,1)
+    connection_layer.test_print(1,0.1)
+    connection_layer.plot()
