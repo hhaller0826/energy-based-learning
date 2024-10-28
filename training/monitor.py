@@ -198,6 +198,7 @@ class Monitor:
         """Add the statistics to the summary writer to monitor with tensorboard"""
 
         # for param in self._network.params(): self._writer.add_histogram(param.name, param.state, self._epoch)
+        # hanita
 
         for series in self._series:
             if series.name: self._writer.add_scalar(series.name, series.last_value(), self._epoch)
