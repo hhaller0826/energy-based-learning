@@ -63,20 +63,25 @@ class JaynesConnectionLayer:
             of universal microstructure" by V. Venkatasubramanian and those other guys:
             1/M_l * ln[M_l! / prod[M_l*x_k]]
         '''
-        product = 1
         d = 0
         for M_l_k in self.bin_counts:
             if M_l_k != 0: d += math.lgamma(M_l_k)
         
         n = math.lgamma(self.M_l)
-        log_term = n-d
+        log_term = n - d
         return log_term / self.M_l
     
     def plot(self):
+        '''
+        Plot a histogram for this layer
+        '''
         plt.bar(x=self.bin_weights, height=self.bin_counts, width=1/self.m, align='edge')
         plt.show()
 
     def test_print(self, alpha, beta):
+        '''
+        Print helpful testing info for the given alpha & beta vals
+        '''
         print("    bin | count | bin connection")
         print("--------------------------------")
         for k in range(0, self.m):
