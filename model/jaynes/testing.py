@@ -1,5 +1,5 @@
 import numpy as np 
-from energy import *
+from layer import *
 
 # I asked ChatGPT to code eq prop lol 
 # might be good for basic testing
