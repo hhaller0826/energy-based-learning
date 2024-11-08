@@ -7,6 +7,11 @@ from model.function.interaction import Function
 from model.variable.parameter import Bias
 from entropy import *
 
+"""
+Extremely generalized functions to calculate Jaynes energy so that they can be 
+applied to most objects.
+"""
+
 def jaynes_network_neuron_potential(network, num_bins:int=10, utility_scale:float=1., disutility_scale:float=1.):
     """Get the Network-wide Jaynes neuron-potential for the given network: 
     sum [ eta * sum[x_k ln(Z_q)] - zeta * sum[x_k (ln(Z_q))^2] + entropy ]
