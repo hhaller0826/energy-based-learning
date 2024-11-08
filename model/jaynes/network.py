@@ -1,51 +1,41 @@
+import torch
 from layer import *
+from model.function.network import Network
+from model.function.interaction import Function
+from model.variable.parameter import Bias
+from energy import *
+from entropy import *
 
 class JaynesNetwork:
-    def __init__(self, data, num_bins):
+    def __init__(self, network: Network):
         # TODO: THIS IS BASICALLY PSEUDOCODE 
-        self.weights = []
-        self.neurons = []
-        self.num_layers = len(data)
-        for layer in range(self.num_layers):
-            self.weights.append(JaynesConnectionLayer(data[layer].weights, num_bins))
-            self.neurons.append(JaynesNeuronalLayer(data[layer].neurons, num_bins))
+        self.network = network
+        self.weights: list[Parameter] = [w for w in Function(network._function).params if type(w) is not Bias]
+        self.neurons: list[Layer] = network.free_layers()
+        self.num_bins = 100
 
     def weight_potential(self, alpha, beta):
         '''
         Return the Jaynes Potential Energy across all layers of weights in the network.
         '''
-        phi_w = 0
-        weight_layer : JaynesConnectionLayer
-        for weight_layer in self.weights:
-            phi_w += weight_layer.potential(alpha, beta)
-        return phi_w
+        return jaynes_network_connection_potential(self.network,self.num_bins,alpha,beta)
     
-    def network_connection_entropy(self):
+    def network_connection_entropy(self, entropy_type: EntropyType):
         '''
         Return the network-wide connection entropy
         '''
-        entropy_w = 0
-        weight_layer : JaynesConnectionLayer
-        for weight_layer in self.weights:
-            entropy_w += weight_layer.entropy()
-        return entropy_w 
+        return network_entropy(self.weights, entropy_type, self.num_bins)
     
     def neuronal_potential(self, eta, zeta):
         '''
         Return the Jaynes Potential Energy across all layers of neurons in the network.
         '''
-        phi_N = 0
-        neuron_layer : JaynesNeuronalLayer
-        for neuron_layer in self.neurons:
-            phi_N += neuron_layer.potential(eta, zeta)
-        return phi_N
+        return jaynes_network_neuron_potential(self.network,self.num_bins,eta,zeta)
     
-    def network_neuron_entropy(self):
+    def network_neuron_entropy(self, entropy_type: EntropyType):
         '''
         Return the network-wide neuronal entropy
         '''
-        entropy_n = 0
-        neuron_layer : JaynesNeuronalLayer
-        for neuron_layer in self.neurons:
-            entropy_n += neuron_layer.entropy()
-        return entropy_n 
+        return network_entropy(self.neurons, entropy_type, self.num_bins) 
+    
+    

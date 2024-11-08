@@ -1,5 +1,8 @@
 import numpy as np 
+import torch
 from layer import *
+from energy import *
+from entropy import *
 
 # I asked ChatGPT to code eq prop lol 
 # might be good for basic testing
@@ -71,8 +74,37 @@ if __name__ == "__main__":
     sample_weights = np.random.uniform(low=0.0, high=1.0, size=(100,))
     print(sample_weights.sort())
 
-    # NOTE: You need to import matplotlib
-    connection_layer = JaynesConnectionLayer(sample_weights, 10)
-    connection_layer.test_print(1,1)
-    connection_layer.test_print(1,0.1)
-    connection_layer.plot()
+    class DummyParam(Parameter):
+        def __init__(self, tensor):
+            Parameter.__init__(self, (1,1), None)
+            self._state = tensor
+
+        def init_state(self):
+            pass
+
+
+    def compare_methods(weights, num_bins:int=10, alpha:float=1., beta:float=1.):
+        tensor = torch.Tensor(weights)
+        
+        params = DummyParam(tensor)
+
+        bin_entropy = BinEntropy(tensor, num_bins)
+        softargmax_entropy = SoftArgmaxEntropy(tensor)
+        connection_layer = JaynesConnectionLayer(tensor, num_bins)
+
+
+        print("=== {} BINS ===".format(num_bins))
+
+        print("OG Potential: ", round(connection_layer.potential(alpha, beta),4))
+        print("New Potential: ", round(jaynes_layer_potential(params, num_bins, alpha, beta),4))
+        
+        print("Entropy:", round(connection_layer.entropy(),4))
+        print("BIN Entropy:", round(bin_entropy.eval(),4))
+        print("SOFTARGMAX Entropy:", round(softargmax_entropy.eval(),4))
+        print()
+
+    
+
+    compare_methods(sample_weights)
+    compare_methods(sample_weights, 50)
+    compare_methods(sample_weights, 100)

@@ -1,80 +1,82 @@
 import torch
-import torch.nn as nn
+from torch import Tensor
+from helpers import *
+from abc import ABC, abstractmethod
+from enum import Enum
+from model.variable.variable import Variable
 
-"""
-dist_from_center should be a function that is about 1 when |dists/sigma| <= 1
-and about 0 otherwise. Approximation of smooth uniform.
-"""
+class Entropy(ABC):
+    """
+    Abstract class for entropy variables (will generally be the entropy
+    of a Parameter or Layer object, corresponding to weights and neurons respecitvely).
 
+    Attributes
+    ----------
+    _distribution (Tensor): distribution of the provided values that is appropriate for the given entropy technique
 
-def generalized_gaussian(dists, sigma, beta = 10): 
-    # Strange behavior when dists/sigma is exactly 1 - 
-    # this would be very likely to happen if sigma is
-    # a negative power of 10 (e.g. 10^-5). Add irrational stabilizer to prevent this
+    Methods
+    -------
+    eval()
+        Evaluates the entropy of the distribution
+    """
+    def __init__(self, values: Tensor):
+        self._distribution = self.init_distribution(values)
+
+    @abstractmethod
+    def init_distribution(self, values):
+        """Initializes the variable"""
+        pass
     
+    @abstractmethod
+    def eval(self):
+        """Evaluate the entropy"""
+        pass 
 
-    exponent = -0.5 * (dists / sigma) ** beta
+class BinEntropy(Entropy):
+    def __init__(self, values: Tensor, num_bins: int=10):
+        self.num_bins = num_bins
+        Entropy.__init__(self, values)
 
+    def init_distribution(self, values):
+        """Scale the values 0-1 and bin them appropriately"""
+        return torch.histc(input=scale_magnitude(values), bins=self.num_bins, min=0, max=1)
     
-    return torch.exp(exponent)
-
-def weighted_softargmax(dists, sigma, beta = -1000): #sigma is unused
-
-    print(dists)
-
-    soft_arg_max = nn.Softmax(dim=0)
-
-    return soft_arg_max(torch.abs(dists) * beta)
-
+    def eval(self):
+        """Calculates the entropy function as given in "Arbitrage equilibrium and the emergence
+            of universal microstructure" by V. Venkatasubramanian and those other guys:
+            weights: 1/M^l * ln[ M^l! / prod[M^l*x_k] ] 
+            neurons: 1/N^l * ln[ N^l! / prod[N^l_q] ]
+        """
+        total_count = sum(self._distribution)
+        ln_prod_factorial = torch.sum(ln_continuous_factorial(self._distribution))
+        ln_count_factorial = ln_continuous_factorial(total_count)
+        entropy = (ln_count_factorial - ln_prod_factorial) / total_count
+        return entropy.item()
     
-
-def ln_continuous_factorial(x):
-    return torch.lgamma(x+1)
-
-def comb_entropy_no_diff(W, num_bins):
-
-    M_l = torch.Tensor([len(W)])
-
-    M_k_l = torch.histc(input = W, bins = num_bins, min = 0, max = 1)
-
-    final_entr = 1/M_l * (ln_continuous_factorial(M_l) - torch.sum(ln_continuous_factorial(M_k_l)))
-    return final_entr.item()
-
-def comb_entropy_diff(W, num_bins, dist_from_center = weighted_softargmax):
-
-    #M_l = torch.Tensor([len(W)])
+class SoftArgmaxEntropy(Entropy):
+    def init_distribution(self, values):
+        """Returns the softmax function applied to the layer's state"""
+        return torch.nn.functional.softmax(values, dim=-1)
     
-    
-    range_step = 1/num_bins
-
-    bin_centers = torch.arange(start= range_step/2, end = 1, step=range_step)
-
-    dists = W.reshape(1, -1) - bin_centers.reshape(-1, 1) #of shape (num_bins, num_weights)
+    def eval(self):
+        """Returns -sum[xlogx] summing over the x's in the distribution"""
+        entropy_list = torch.mul(self._distribution, torch.log(self._distribution))
+        return -1 * torch.sum(entropy_list).item()
 
 
-    dists = dist_from_center(dists=dists, sigma = range_step/2)
+class EntropyType(Enum):
+    BINS = BinEntropy
+    SOFTARG = SoftArgmaxEntropy
 
-    print(dists)
+def network_entropy(values: list[Variable], entropy_type: EntropyType, num_bins):
+    def s_n(layer: Layer):
+        if entropy_type is EntropyType.BINS:
+            if type(num_bins) is int: entropy = BinEntropy(layer.state, num_bins)
+            else: entropy = BinEntropy(layer.state)
+        else:
+            entropy = SoftArgmaxEntropy(layer.state)
+        return entropy.eval()
 
-    M_k_l = torch.sum(dists, dim = -1)
+    entropies = [s_n(layer) for layer in values]
 
-    M_l = torch.sum(dists) # This seems to perform better than using number of weights directly
-
-
-    #print("M_l", M_l)
-    #print("M_k_l", M_k_l)
-
-    #print(torch.sum(ln_continuous_factorial(M_k_l)))
-
-    final_entr = 1/M_l * (ln_continuous_factorial(M_l) - torch.sum(ln_continuous_factorial(M_k_l)))
-    return final_entr.item()
-
-num_bins = 23
-
-#generate indices and weights
-W_size = num_bins
-
-W = torch.rand(W_size)
-
-print("Differentiable Combinatorial Entropy (Approximation) Using Softmax", comb_entropy_diff(W, num_bins=num_bins))
-print("Combinatorial Entropy True Value", comb_entropy_no_diff(W, num_bins=num_bins))
+    return sum(entropies) 
