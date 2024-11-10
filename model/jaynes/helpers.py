@@ -10,6 +10,10 @@ class VariableType(Enum):
     NEURON = Layer
     CONNECTION = Parameter
 
+class EntropyType(Enum):
+    BINS = 'bins'
+    SOFTARG = 'softargmax'
+
 def ln_continuous_factorial(x) -> float:
     '''
     Returns ln(x!)

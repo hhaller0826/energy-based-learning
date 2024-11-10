@@ -2,13 +2,24 @@ import torch
 from torch import Tensor
 from helpers import *
 from abc import ABC, abstractmethod
-from enum import Enum
 from model.variable.variable import Variable
 
+def network_entropy(values: list[Variable], entropy_type: EntropyType, num_bins=None):
+    def s_n(layer: Layer):
+        if entropy_type is EntropyType.BINS:
+            if type(num_bins) is int: entropy = BinEntropy(layer.state, num_bins)
+            else: entropy = BinEntropy(layer.state)
+        else: # Default to soft argmax
+            entropy = SoftArgmaxEntropy(layer.state)
+        return entropy.eval()
+
+    entropies = [s_n(layer) for layer in values]
+
+    return sum(entropies) 
 class Entropy(ABC):
     """
-    Abstract class for entropy variables (will generally be the entropy
-    of a Parameter or Layer object, corresponding to weights and neurons respecitvely).
+    Abstract class to calculate the entropy of a Tensor of values. These values will typically be the 
+    state vectors of a Parameter or Layer object, which correspond to a network's weights and neurons respecitvely.
 
     Attributes
     ----------
@@ -62,21 +73,3 @@ class SoftArgmaxEntropy(Entropy):
         """Returns -sum[xlogx] summing over the x's in the distribution"""
         entropy_list = torch.mul(self._distribution, torch.log(self._distribution))
         return -1 * torch.sum(entropy_list).item()
-
-
-class EntropyType(Enum):
-    BINS = BinEntropy
-    SOFTARG = SoftArgmaxEntropy
-
-def network_entropy(values: list[Variable], entropy_type: EntropyType, num_bins):
-    def s_n(layer: Layer):
-        if entropy_type is EntropyType.BINS:
-            if type(num_bins) is int: entropy = BinEntropy(layer.state, num_bins)
-            else: entropy = BinEntropy(layer.state)
-        else:
-            entropy = SoftArgmaxEntropy(layer.state)
-        return entropy.eval()
-
-    entropies = [s_n(layer) for layer in values]
-
-    return sum(entropies) 
