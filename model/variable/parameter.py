@@ -71,11 +71,9 @@ class Bias(Parameter):
         Bias._counter += 1
 
     def init_state(self, gain):
-        """Initializes the bias tensor to zero, i.e. b=0."""
+        """Initializes the bias tensor by sampling a uniform distribution on a symmetric range about 0"""
 
-        # TODO: implement recommended initialization schemes for biases, instead of zero
-
-        # torch.nn.init.constant_(self._state, 0.)
+        # torch.nn.init.constant_(self._state, 0.) # If one were to initialize all biases to 0
         torch.nn.init.uniform_(self._state, -gain, +gain)
 
 
