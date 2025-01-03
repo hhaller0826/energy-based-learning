@@ -1,5 +1,31 @@
 import torch
 import torchvision
+from torch.utils.data import Dataset, DataLoader
+from sklearn.datasets import make_moons
+from sklearn.model_selection import train_test_split
+
+class TwoMoonsDataset(Dataset):
+    def __init__(self, data, labels, transform=None):
+        """
+        A PyTorch Dataset for the Two Moons data.
+        
+        Args:
+            data (array-like): Input data points (features).
+            labels (array-like): Target labels.
+            transform (callable, optional): Optional transform to apply to the data.
+        """
+        self.data = torch.tensor(data, dtype=torch.float32)
+        self.labels = torch.tensor(labels, dtype=torch.long)
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        sample, label = self.data[idx], self.labels[idx]
+        if self.transform:
+            sample = self.transform(sample)
+        return sample, label
 
 class IndexedDataset(torch.utils.data.Dataset):
     """
@@ -30,6 +56,32 @@ class IndexedDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self._dataset)
 
+def load_two_moons(n_samples=1000, noise=0.1, test_size=0.2, transform=None):
+    """
+    Loads the Two Moons dataset with train/test splits.
+
+    Args:
+        n_samples (int): Total number of samples to generate.
+        noise (float): Noise level for the dataset.
+        test_size (float): Proportion of the dataset to be used as test data.
+        transform (callable, optional): Optional transform to apply to the data.
+
+    Returns:
+        tuple: Training dataset and test dataset as PyTorch Dataset objects.
+    """
+    # Generate two moons dataset
+    data, labels = make_moons(n_samples=n_samples, noise=noise, random_state=42)
+
+    # Split into training and test sets
+    data_train, data_test, labels_train, labels_test = train_test_split(
+        data, labels, test_size=test_size, random_state=42
+    )
+
+    # Create PyTorch Datasets
+    training_data = TwoMoonsDataset(data_train, labels_train, transform=transform)
+    test_data = TwoMoonsDataset(data_test, labels_test, transform=transform)
+
+    return training_data, test_data
 
 def load_mnist(normalize=False, augment_32x32=False):
     """Loads the MNIST dataset (training and test sets).
@@ -292,8 +344,8 @@ def load_dataset(dataset, normalize=True, augment_32x32=False):
     elif dataset == 'SVHN': return load_svhn(normalize)
     elif dataset == 'CIFAR10': return load_cifar10(normalize)
     elif dataset == 'CIFAR100': return load_cifar100(normalize)
-    else: raise ValueError("expected 'MNIST', 'FashionMNIST', `SVHN', `CIFAR10' or `CIFAR100' but got {}".format(dataset))
-
+    elif dataset == 'TwoMoons': return load_two_moons()
+    else: raise ValueError("expected 'MNIST', 'FashionMNIST', `SVHN', `CIFAR10', `CIFAR100', or 'TwoMoons' but got {}".format(dataset))
 
 def load_dataloaders(dataset, batch_size, augment_32x32=False, normalize=True):
     """Builds data loaders (training and test loaders).
