@@ -1,6 +1,6 @@
 import torch
 from torch import Tensor
-from helpers import *
+from model.jaynes.helpers import *
 from abc import ABC, abstractmethod
 from model.variable.variable import Variable
 

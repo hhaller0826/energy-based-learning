@@ -1,11 +1,11 @@
 import torch
 from torch import Tensor
-from helpers import *
+from model.jaynes.helpers import *
 from model.variable.variable import Variable
 from model.function.network import Network
 from model.function.interaction import Function
 from model.variable.parameter import Bias
-from entropy import *
+from model.jaynes.entropy import *
 
 """
 Extremely generalized functions to calculate Jaynes energy so that they can be 

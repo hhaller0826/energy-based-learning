@@ -1,8 +1,10 @@
 import numpy as np 
 import torch
-from layer import *
-from energy import *
-from entropy import *
+from model.jaynes.layer import *
+from model.jaynes.energy import *
+from model.jaynes.entropy import *
+from model.jaynes.statistics import *
+from model.hopfield.layer import SigmoidLayer
 
 # I asked ChatGPT to code eq prop lol 
 # might be good for basic testing
@@ -103,8 +105,31 @@ if __name__ == "__main__":
         print("SOFTARGMAX Entropy:", round(softargmax_entropy.eval(),4))
         print()
 
+    def sigmoid_layer():
+        ""
+        shape = (2, 5)
+        mock_vals = torch.Tensor([[[1., 2., 3., 4., 5.],
+         [0.1, 0.5, 6., 0., 0.]]])
+        sig = SigmoidLayer(shape)
+        tens = torch.Tensor(mock_vals)
+        sig.state = tens
+        return sig
     
+    def test_sigmoid_stats():
+        sig = sigmoid_layer()
+        print("=== SIGMOID STATS ===")
+        print("Sigmoid: ",sig.state)
+        print("layer_to_iota: ",layer_to_iota(sigmoid_layer()))
+        print(type(sig))
+        print(sig.activate())
+        print()
+
+
 
     compare_methods(sample_weights)
     compare_methods(sample_weights, 50)
     compare_methods(sample_weights, 100)
+
+    test_sigmoid_stats()
+
+

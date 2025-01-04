@@ -1,5 +1,5 @@
 import math
 import matplotlib.pyplot as plt
-from helpers import *
+from model.jaynes.helpers import *
 
 # TODO
