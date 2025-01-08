@@ -88,7 +88,7 @@ class DenseWeight(Parameter):
 
     _counter = 0
 
-    def __init__(self, layer_pre_shape, layer_post_shape, gain, device, clamp=False):
+    def __init__(self, layer_pre_shape, layer_post_shape, gain, device, mode, clamp=False):
         """Initializes an instance of DenseWeight
 
         Args:
@@ -103,7 +103,7 @@ class DenseWeight(Parameter):
 
         self._layer_pre_shape = layer_pre_shape
         self._layer_post_shape = layer_post_shape
-
+        self._mode = mode
         self.init_state(gain)
         self.clamp_()
 
@@ -111,7 +111,7 @@ class DenseWeight(Parameter):
 
         DenseWeight._counter += 1
 
-    def init_state(self, gain, mode='kaiming_uniform'):
+    def init_state(self, gain):
         """Initializes the weight tensor according to a uniform or normal distribution.
         Args:
             gain (float32): Number used to scale the weight tensor (~ proportional to the standard deviations of the weight)
@@ -123,20 +123,20 @@ class DenseWeight(Parameter):
         size_post = 1
         for dim in self._layer_post_shape: size_post *= dim
         
-        if mode == 'xavier_uniform':
+        if self._mode == 'xavier_uniform':
             # half xavier uniform
             scale = gain * 0.5 * np.sqrt(6. / (size_pre + size_post))
             torch.nn.init.uniform_(self._state, -scale, +scale)
-        elif mode == 'xavier_normal':
+        elif self._mode == 'xavier_normal':
             # half xavier normal
             scale = gain * 0.5 * np.sqrt(2. / (size_pre + size_post))
             torch.nn.init.normal_(self._state, std=scale)
-        elif mode == 'kaiming_uniform':
+        elif self._mode == 'kaiming_uniform':
             # half kaiming uniform
             # scale = gain * 0.5 * np.sqrt(3. / size_pre)
             scale = gain * np.sqrt(1. / size_pre)
             torch.nn.init.uniform_(self._state, -scale, +scale)
-        else:  #  mode == 'kaiming_normal'
+        else:
             # half kaiming normal
             scale = gain * 0.5 * np.sqrt(1. / size_pre)
             torch.nn.init.normal_(self._state, std=scale)
@@ -171,7 +171,7 @@ class ConvWeight(Parameter):
 
         ConvWeight._counter += 1
 
-    def init_state(self, gain, mode='kaiming_uniform'):
+    def init_state(self, gain, mode='xavier_uniform'):
         """Initializes the weight tensor.
 
         Args:

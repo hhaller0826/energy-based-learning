@@ -77,7 +77,7 @@ class CostFunction(ABC):
         """
 
         output = self._get_output()  # state of output layer
-        _, indices = torch.topk(output, 5, dim=1)  # top-5 categories indices of the output unit
+        _, indices = torch.topk(output, 2, dim=1)  # top-5 categories indices of the output unit
         label = self._label.unsqueeze(-1)
         return torch.all(torch.ne(indices, label), dim=1)
     

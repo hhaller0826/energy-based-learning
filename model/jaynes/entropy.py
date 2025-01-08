@@ -16,6 +16,7 @@ def network_entropy(values: list[Variable], entropy_type: EntropyType, num_bins=
     entropies = [s_n(layer) for layer in values]
 
     return sum(entropies) 
+
 class Entropy(ABC):
     """
     Abstract class to calculate the entropy of a Tensor of values. These values will typically be the 

@@ -82,7 +82,7 @@ class DeepHopfieldEnergy(SumSeparableFunction):
     The underlying model consists of multiple layers. Successive layers are densely connected.
     """
 
-    def __init__(self, layer_shapes, weight_gains):
+    def __init__(self, layer_shapes, weight_gains, weight_dist='xavier_unform'):
         """Creates an instance of a deep Hopfield network (DHN)
 
         Args:
@@ -92,6 +92,7 @@ class DeepHopfieldEnergy(SumSeparableFunction):
 
         self._layer_shapes = layer_shapes
         self._weight_gains = weight_gains
+        self._weight_dist = weight_dist
 
         # shapes of the layers
         input_shape = layer_shapes[0]
@@ -109,7 +110,7 @@ class DeepHopfieldEnergy(SumSeparableFunction):
         bias_interactions = [BiasInteraction(layer, bias) for layer, bias in zip(layers, biases)]
 
         # build the weights of the network
-        weights = [DenseWeight(shape_pre, shape_post, gain, device=None) for shape_pre, shape_post, gain in zip(layer_shapes[:-1], layer_shapes[1:], weight_gains)]
+        weights = [DenseWeight(shape_pre, shape_post, gain, device=None, mode=self._weight_dist) for shape_pre, shape_post, gain in zip(layer_shapes[:-1], layer_shapes[1:], weight_gains)]
         weight_interactions = [DenseHopfield(layer_pre, layer_post, weight) for layer_pre, layer_post, weight in zip(layers[:-1], layers[1:], weights)]
             
         params = biases[1:] + weights

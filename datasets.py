@@ -56,7 +56,7 @@ class IndexedDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self._dataset)
 
-def load_two_moons(n_samples=1000, noise=0.1, test_size=0.2, transform=None):
+def load_two_moons(n_samples=10000, noise=0.01, test_size=0.2, transform=None):
     """
     Loads the Two Moons dataset with train/test splits.
 

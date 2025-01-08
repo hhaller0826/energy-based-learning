@@ -85,7 +85,6 @@ class GradientDescentUpdater(LayerUpdater):
         return self._layer.state - self._step_size * self.grad()  # tensor of size (batch_size, layer_shape)
 
 
-
 class Minimizer:
     """
     Abstract class for minimizing a scalar function.
