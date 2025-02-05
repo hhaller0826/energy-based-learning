@@ -124,6 +124,8 @@ class Minimizer:
         self._layers = fn.layers()
         self._params = fn.params()
 
+        self._fn = fn
+
         self._updaters = updaters
 
         self._num_iterations = num_iterations
@@ -165,6 +167,16 @@ class Minimizer:
         layers = {layer.name: layer.state for layer in self._layers}
 
         return layers
+    
+    def compute_eq_energy(self):
+
+        for layer_group in self._list_layers: self.step(layer_group)
+        
+        energy = self._fn.eval()
+
+        layers = {layer.name: layer.state for layer in self._layers}
+
+        return energy, layers
 
     def compute_trajectory(self):
         """Compute the trajectory of the layers during the minimization process
