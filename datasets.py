@@ -3,6 +3,7 @@ import torchvision
 from torch.utils.data import Dataset, DataLoader
 from sklearn.datasets import make_moons
 from sklearn.model_selection import train_test_split
+from new_datasets import make_interlocking_circles
 
 class TwoMoonsDataset(Dataset):
     def __init__(self, data, labels, transform=None):
@@ -14,6 +15,21 @@ class TwoMoonsDataset(Dataset):
             labels (array-like): Target labels.
             transform (callable, optional): Optional transform to apply to the data.
         """
+        self.data = torch.tensor(data, dtype=torch.float32)
+        self.labels = torch.tensor(labels, dtype=torch.long)
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.labels)
+
+    def __getitem__(self, idx):
+        sample, label = self.data[idx], self.labels[idx]
+        if self.transform:
+            sample = self.transform(sample)
+        return sample, label
+    
+class InterlockingCirclesDataset(Dataset):
+    def __init__(self, data, labels, transform=None):
         self.data = torch.tensor(data, dtype=torch.float32)
         self.labels = torch.tensor(labels, dtype=torch.long)
         self.transform = transform
@@ -56,6 +72,7 @@ class IndexedDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self._dataset)
 
+
 def load_two_moons(n_samples=50000, noise=0.2, test_size=0.2, transform=None):
     """
     Loads the Two Moons dataset with train/test splits.
@@ -80,6 +97,20 @@ def load_two_moons(n_samples=50000, noise=0.2, test_size=0.2, transform=None):
     # Create PyTorch Datasets
     training_data = TwoMoonsDataset(data_train, labels_train, transform=transform)
     test_data = TwoMoonsDataset(data_test, labels_test, transform=transform)
+
+    return training_data, test_data
+
+def load_interlocking_circles(n_samples=50000, noise=0.25, test_size=0.2, transform=None):
+    data, labels = make_interlocking_circles(n_samples=n_samples, noise=noise, random_state=42)
+
+    # Split into training and test sets
+    data_train, data_test, labels_train, labels_test = train_test_split(
+        data, labels, test_size=test_size, random_state=42
+    )
+
+    # Create PyTorch Datasets
+    training_data = InterlockingCirclesDataset(data_train, labels_train, transform=transform)
+    test_data = InterlockingCirclesDataset(data_test, labels_test, transform=transform)
 
     return training_data, test_data
 
@@ -345,7 +376,8 @@ def load_dataset(dataset, normalize=True, augment_32x32=False):
     elif dataset == 'CIFAR10': return load_cifar10(normalize)
     elif dataset == 'CIFAR100': return load_cifar100(normalize)
     elif dataset == 'TwoMoons': return load_two_moons()
-    else: raise ValueError("expected 'MNIST', 'FashionMNIST', `SVHN', `CIFAR10', `CIFAR100', or 'TwoMoons' but got {}".format(dataset))
+    elif dataset == 'InterlockingCircles': return load_interlocking_circles()
+    else: raise ValueError("expected 'MNIST', 'FashionMNIST', `SVHN', `CIFAR10', `CIFAR100', 'TwoMoons', or InterlockingCircles but got {}".format(dataset))
 
 def load_dataloaders(dataset, batch_size, augment_32x32=False, normalize=True):
     """Builds data loaders (training and test loaders).
