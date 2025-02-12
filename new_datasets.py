@@ -44,3 +44,114 @@ def make_interlocking_circles(n_samples=1000, noise=0.05, random_state=None):
     X += np.random.normal(scale=noise, size=X.shape)
 
     return X, y
+
+import numpy as np
+
+def make_interlocking_chain(n_samples=1000, noise=0.05, len_chain=6, random_state=None):
+    """
+    Generates a 3D dataset of interlocking circles forming a chain.
+
+    Parameters:
+    - n_samples (int): Total number of points (split evenly among all circles).
+    - noise (float): Standard deviation of Gaussian noise.
+    - len_chain (int): Number of interlocking circles in the chain.
+    - random_state (int, optional): Random seed for reproducibility.
+
+    Returns:
+    - X (ndarray): (n_samples, 3) array of 3D points.
+    - y (ndarray): (n_samples,) array of labels (0 or 1, alternating).
+    """
+    if random_state is not None:
+        np.random.seed(random_state)
+
+    n_samples_per_circle = n_samples // len_chain  # Distribute samples evenly
+
+    X_list = []
+    y_list = []
+    
+    # Track the position of each circle
+    position = np.array([0.0, 0.0, 0.0])
+
+    for i in range(len_chain):
+        theta = np.linspace(0, 2 * np.pi, n_samples_per_circle)
+        
+        if i % 2 == 0:
+            # Even index: Circle in XY-plane
+            x = np.cos(theta) + position[0]
+            y = np.sin(theta) + position[1]
+            z = np.zeros_like(theta) + position[2]
+            position += np.array([0, 1.5, 0])  # Move up for next interlock
+        else:
+            # Odd index: Circle in YZ-plane
+            x = np.zeros_like(theta) + position[0]
+            y = np.cos(theta) + position[1]
+            z = np.sin(theta) + position[2]
+            position += np.array([1, 0, 0])  # Move sideways for next interlock
+
+        # Stack points and labels
+        X_list.append(np.column_stack([x, y, z]))
+        y_list.append(np.full(n_samples_per_circle, i % 2))  # Alternate labels
+
+    # Combine all circles
+    X = np.vstack(X_list)
+    y = np.hstack(y_list)
+
+    # Add Gaussian noise
+    X += np.random.normal(scale=noise, size=X.shape)
+
+    return X, y
+
+import numpy as np
+
+def make_single_interlocking_chain(n_samples=1000, noise=0.05, len_chain=3, random_state=None):
+    """
+    Generates a 3D dataset of a single interlocking chain of circles with alternating labels.
+    
+    Parameters:
+    - n_samples (int): Total number of points (split evenly among all circles).
+    - noise (float): Standard deviation of Gaussian noise.
+    - len_chain (int): Number of interlocking circles in the chain.
+    - random_state (int, optional): Random seed for reproducibility.
+
+    Returns:
+    - X (ndarray): (n_samples, 3) array of 3D points.
+    - y (ndarray): (n_samples,) array of labels (0, 1 alternating).
+    """
+    if random_state is not None:
+        np.random.seed(random_state)
+
+    n_samples_per_circle = n_samples // len_chain  # Points per circle
+    X_list = []
+    y_list = []
+    
+    # Start position
+    position = np.array([0.0, 0.0, 0.0])
+
+    for i in range(len_chain):
+        theta = np.linspace(0, 2 * np.pi, n_samples_per_circle)
+
+        if i % 2 == 0:
+            # Even index: Circle in XY-plane
+            x = np.cos(theta) + position[0]
+            y = np.sin(theta) + position[1]
+            z = np.zeros_like(theta) + position[2]
+            position += np.array([0, 1, 0])  # Move up for next interlock
+        else:
+            # Odd index: Circle in YZ-plane
+            x = np.zeros_like(theta) + position[0]
+            y = np.cos(theta) + position[1]
+            z = np.sin(theta) + position[2]
+            position += np.array([1, 0, 0])  # Move sideways for next interlock
+
+        # Stack points and alternating labels
+        X_list.append(np.column_stack([x, y, z]))
+        y_list.append(np.full(n_samples_per_circle, i % 2))  # Alternating labels
+
+    # Combine all circles
+    X = np.vstack(X_list)
+    y = np.hstack(y_list)
+
+    # Add Gaussian noise
+    X += np.random.normal(scale=noise, size=X.shape)
+
+    return X, y
