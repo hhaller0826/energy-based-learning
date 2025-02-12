@@ -1,0 +1,21 @@
+{
+    "num_iterations_inference": 50,
+    "num_iterations_training": 20,
+    "nudging": 0.2,
+    "num_epochs": 25,
+    "num_hidden_layers": 1,
+    "estimator_variant": "centered",
+    "num_neurons": 64,
+    "training_mode": "asynchronous",
+    "inference_mode": "asynchronous",
+    "batch_size": 64,
+    "momentum": 0,
+    "weight_decay":0,
+    "device": "cuda",
+    "layers": [1,64,1],
+    "model_name": "model",
+    "weight_init_dist": "xavier_uniform",
+    "path": "papers/fast-drn/model/EP",
+    "output_layer": -1,
+    "comment": "``` Make dict of hyperparameters for ease of use."
+} 
