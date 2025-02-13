@@ -41,6 +41,7 @@ class Network():
         return self.free_layers
 
     def change_clamped_layers(self):
+        return
 
     def set_input(self, input_values, reset=False):
         """Set the input layer to input values

@@ -34,8 +34,8 @@ class EquiPropEstimator:
         else:
             self.energy_minimizer = energy_minimizer
         self.free_layers = model.free_layers() 
-        self.params = energy_fn.params() 
-        self.layers = energy_fn.layers() 
+        self.params = self.energy_fn.params() 
+        self.layers = self.energy_fn.layers() 
         self.gradient_estimator = EquilibriumProp(self.params, self.layers, self.augmented_fnc, self.cost_fnc, self.energy_minimizer) 
 
 
