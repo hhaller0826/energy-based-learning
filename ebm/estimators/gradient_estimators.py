@@ -1,8 +1,9 @@
 # update config function import
 import torch
-from ebm.estimators.optimizer import Optimizer
+from ebm.estimators.optimizer import SGDOptimizer
 from ebm.estimators.cost import SquaredError
-from ebm.estimators.augmented_function import AugmentedFunction, FixedPointMinimizer
+from ebm.estimators.equilibrium_prop import AugmentedFunction
+from ebm.estimators.minizers import FixedPointMinimizer
 from ebm.estimators.equilibrium_prop import EquilibriumProp
 
 
@@ -19,16 +20,18 @@ def _get_energy_minimizer(config, augmented_fnc, free_layers):
         return FixedPointMinimizer(augmented_fnc,free_layers)
 
 class EquiPropEstimator:
-    def __init__(self, model, cost_fnc, config, augmented_fnc=None, energy_minimizer=None):
-        self.energy_fn = model.function()
+    def __init__(self, model, cost_fnc,  augmented_fnc=None, energy_minimizer=None):
+        self.energy_fn = model.function
+        config = model.config
+        
         if cost_fnc is None:
-            self.cost_fnc = _get_cost_fnc(model, config)
+            self.cost_function = _get_cost_fnc(model, config)
         else:
-            self.cost_fnc = cost_fnc
+            self.cost_function = cost_fnc
         if augmented_fnc is None:    
-            self.augmented_fnc = _get_augmented_fnc(model, config, cost_fnc)
+            self.augmented_function = _get_augmented_fnc(model, config, cost_fnc)
         else:
-            self.augmented_fnc = augmented_fnc
+            self.augmented_function = augmented_fnc
         if energy_minimizer is None:
             self.energy_minimizer = _get_energy_minimizer(config, augmented_fnc, model.free_layers())
         else:

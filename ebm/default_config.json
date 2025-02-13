@@ -1,7 +1,7 @@
 {
     "path": "papers/fast-drn/model/EP",
     "comment": "``` Make dict of hyperparameters for ease of use.",
-    "device": "cuda",
+    "device": "cpu",
     "model":{
         "model_name": "model",
         "weight_init_dist": "xavier_uniform",
@@ -14,7 +14,8 @@
         "variant": "centered"
     },
     "cost_function":{
-        "name": "squared_error"
+        "name": "squared_error",
+        "output_layer": -1
     },
     "augmented_function": {
         "name": "fixed_point"
@@ -35,6 +36,8 @@
     },
     "training": {
         "num_epochs": 25,
-        "batch_size": 64
+        "batch_size": 64,
+        "tensorboard": true,
+        "save_model": true
     }
 } 

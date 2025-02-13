@@ -1,10 +1,11 @@
+import numpy as np
 import numpy
-from networks.util.network import Network
-from networks.interaction import SumSeparableFunction
-from networks.util.variable.layer import InputLayer, LinearLayer
-from networks.hopfield.layer import HardSigmoidLayer, SigmoidLayer, SoftMaxLayer, dSiLULayer
-from networks.util.variable.parameter import Bias, DenseWeight, ConvWeight
-from networks.hopfield.interaction import BiasInteraction, DenseHopfield, ConvAvgPoolHopfield, ConvMaxPoolHopfield, ConvSoftPoolHopfield, ModernHopfield
+from ..util.network import Network
+from ..util.interaction import SumSeparableFunction
+from ..util.variable.layer import InputLayer, LinearLayer
+from .layer import HardSigmoidLayer, SigmoidLayer, SoftMaxLayer, dSiLULayer
+from ..util.variable.parameter import Bias, DenseWeight, ConvWeight
+from .interaction import BiasInteraction, DenseHopfield, ConvAvgPoolHopfield, ConvMaxPoolHopfield, ConvSoftPoolHopfield, ModernHopfield
 
 
 

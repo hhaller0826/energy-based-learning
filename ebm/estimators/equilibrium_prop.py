@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from itertools import accumulate
 import torch
 
-from model.function.interaction import Function, SumSeparableFunction
-from model.minimizer.minimizer import ParamUpdater, GradientDescentUpdater
+from ebm.networks.util.interaction import Function, SumSeparableFunction
+from ebm.estimators.minizers import ParamUpdater, GradientDescentUpdater
 
 
 
@@ -72,9 +72,10 @@ class AugmentedFunction(SumSeparableFunction):
         Returns the value of the augmented function (for the current configuration)
     """
 
-    def __init__(self, model, cost_fn, config):
+    def __init__(self, model, cost_fn):
         """Creates an instance of AugmentedFunction"""
-        energy_fn = model._function()
+        energy_fn = model.function
+        config = model.config
         layers = energy_fn.layers()
         params = energy_fn.params()
 

@@ -269,9 +269,6 @@ class ParamUpdater:
         self.second_fn = fn.second_fn(param)  # this is a method, not an attribute
 
 
-from model.minimizer.minimizer import LayerUpdater, Minimizer
-
-
 class HopfieldLayerUpdater(LayerUpdater):
     """
     Class to update a layer according to a `Hopfield update'.

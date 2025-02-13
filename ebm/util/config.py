@@ -1,7 +1,7 @@
 import json
 
 class Config:
-    def __init__(self, json_file=None, args=None):
+    def __init__(self, json_file="ebm/default_config.json", args=None):
         # Default configuration settings
         self.path = "papers/fast-drn/model/EP"
         self.comment = "Make dict of hyperparameters for ease of use."

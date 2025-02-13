@@ -1,8 +1,8 @@
 import torch
 from torch import Tensor
-from helpers import *
+from .helpers import *
 from abc import ABC, abstractmethod
-from model.variable.variable import Variable
+from ebm.networks.util.variable.variable import Variable
 
 def network_entropy(values: list[Variable], entropy_type: EntropyType, num_bins=None):
     def s_n(layer: Layer):

@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 
-from model.function.interaction import Function 
+from ..util.interaction import Function 
 
 
 

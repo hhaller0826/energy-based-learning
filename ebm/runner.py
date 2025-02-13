@@ -7,11 +7,11 @@ import torch
 from torch.utils.tensorboard import SummaryWriter
 
 # These imports are assumed to exist in your code base.
-from util.statistics import (Counter, ErrorFinder, EnergyStat, CostStat,
+from .util.statistics import (Counter, ErrorFinder, EnergyStat, CostStat,
                                  ErrorStat, TopFiveErrorStat, ViolationStat,
                                  NormStat, SaturationStat, GradientStat)
 # Also assume you have a TimeSeries class for logging statistics.
-from util.timeseries import TimeSeries  # <-- adjust as needed
+from .util.timeseries import TimeSeries  # <-- adjust as needed
 
 
 class NetworkRunner:
@@ -23,9 +23,8 @@ class NetworkRunner:
       - eval(dataloader=None, verbose=False): Runs evaluation on the default evaluation dataloader
           (or on a provided one)
     """
-    def __init__(self, model,optimizer,estimator, train_dataloader, eval_dataloader,config
-                 params=None, differentiator=None, optimizer=None, energy_minimizer=None,
-                 scheduler=None, path=None, use_tensorboard=True):
+    def __init__ (self, model,optimizer,estimator, scheduler, train_dataloader, eval_dataloader,config,
+        params=None, differentiator=None, energy_minimizer=None, path=None, use_tensorboard=True):
         """
         Initialize the ModelRunner with all the ingredients.
         
@@ -48,19 +47,21 @@ class NetworkRunner:
         self._estimator = estimator
         self._train_loader = train_dataloader
         self._eval_loader = eval_dataloader
+        self._cost_function = estimator.cost_function
 
         # Combine provided parameters with those returned by cost_fn.params()
-        self._params = params + cost_fn.params()
+        self._params = self._network.params + self._cost_function.params()
 
         self._differentiator = estimator.gradient_estimator
         self._cost_fn = estimator.cost_fn
-        self._optimizer = est
-        self._energy_minimizer = energy_minimizer
+        self._optimizer = optimizer
+        self._energy_minimizer = estimator.energy_minimizer
         self._scheduler = scheduler
-
+        
+        path = self._config.path
         self._path = datetime.now().strftime("%Y%m%d-%H%M%S") if path is None else path
-        self._use_tensorboard = use_tensorboard
-        if use_tensorboard:
+        self._use_tensorboard = self._config.use_tensorboard
+        if self._config.training['use_tensorboard']:
             self._writer = SummaryWriter(self._path)
 
         self._epoch = 0

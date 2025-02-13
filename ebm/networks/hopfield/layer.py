@@ -1,7 +1,7 @@
 from abc import ABC
 import torch
 
-from ebg.model.util.variable.layer import Layer
+from ..util.variable.layer import Layer
 
 
 class HardSigmoidLayer(Layer):

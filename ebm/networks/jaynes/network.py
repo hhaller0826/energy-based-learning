@@ -1,10 +1,10 @@
 import torch
-from layer import *
-from model.function.network import Network
-from model.function.interaction import Function
-from model.variable.parameter import Bias
-from energy import *
-from entropy import *
+from .layer import *
+from ebm.networks.util.network import Network
+from ebm.networks.util.interaction import Function
+from ebm.networks.util.variable.parameter import Bias
+from .energy import *
+from .entropy import *
 
 class JaynesNetwork:
     def __init__(self, network: Network):

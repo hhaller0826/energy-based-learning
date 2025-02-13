@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 from torch import Tensor
-from helpers import *
+from .helpers import *
 
 class JaynesVariable:
     """

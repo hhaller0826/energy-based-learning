@@ -3,8 +3,8 @@ import torch
 from torch import Tensor
 from enum import Enum
 
-from model.variable.layer import Layer
-from model.variable.parameter import Parameter
+from ebm.networks.util.variable.layer import Layer
+from ebm.networks.util.variable.parameter import Parameter
 
 class VariableType(Enum):
     NEURON = Layer

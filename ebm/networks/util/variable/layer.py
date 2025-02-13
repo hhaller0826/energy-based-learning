@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import torch
 
-from model.variable.variable import Variable
+from ebm.networks.util.variable.variable import Variable
 
 
 

@@ -3,8 +3,8 @@ import numpy
 import torch
 import torch.nn.functional as F
 
-from model.function.interaction import Function, QFunction
-from model.variable.parameter import Bias, DenseWeight
+from ..networks.util.interaction import Function, QFunction
+from ..networks.util.variable.parameter import Bias, DenseWeight
 
 
 
@@ -105,8 +105,8 @@ class SquaredError(CostFunction, QFunction):
         """
         config = model.config
         if layer is None:
-            layer_num = config.output_layer
-            layer = model._function.layers()[layer_num]
+            layer_num = config.cost_function["output_layer"]
+            layer = model.function.layers()[layer_num]
 
         self._layer = layer
 
