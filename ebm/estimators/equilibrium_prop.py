@@ -179,7 +179,7 @@ class EquilibriumProp(GradientEstimator):
         Compute and return the sequence of time-dependent layer- and parameter- EP gradients
     """
 
-    def __init__(self, model, cost_fn, energy_minimizer, config):
+    def __init__(self, params, layers, energy_fn, cost_fn, energy_minimizer, config):
         """Creates an instance of equilibrium propagation
 
         Args:
@@ -192,9 +192,7 @@ class EquilibriumProp(GradientEstimator):
             nudging (float, optional): the nudging value used to estimate the parameter gradients via EP. Default: 0.25
             use_alternative_formula (bool, optional): which equilibrium propagation formula is used to estimating the parameter gradients. Either the 'standard' formula (False) or the 'alternative' formula (True). Default: False
         """
-        energy_fn = model._function()
-        params = energy_fn.params() # Implement in class
-        layers = energy_fn.layers() # Implement in class
+
         self._params = params
         self._layers = layers
         nudging = config.nudging

@@ -1,0 +1,40 @@
+{
+    "path": "papers/fast-drn/model/EP",
+    "comment": "``` Make dict of hyperparameters for ease of use.",
+    "device": "cuda",
+    "model":{
+        "model_name": "model",
+        "weight_init_dist": "xavier_uniform",
+        "layers": [1,64,1],
+        "output_layer": -1
+    },
+    "gradient_estimator":{
+        "name": "equilibrium_propagation",
+        "nudging": 0.2,
+        "variant": "centered"
+    },
+    "cost_function":{
+        "name": "squared_error"
+    },
+    "augmented_function": {
+        "name": "fixed_point"
+    },
+    "minimizer":{
+        "name": "fixed_point",
+        "training_mode": "asynchronous",
+        "training_iterations": 20,
+        "inference_mode": "asynchronous",
+        "inference_iterations": 50
+    },
+    "optimizer": {
+        "optimizer_name": "adam",
+        "learning_rates_weights": 0.001,
+        "learning_rates_bias": 0.001,
+        "weight_decay": 0.0,
+        "momentum": 0.0
+    },
+    "training": {
+        "num_epochs": 25,
+        "batch_size": 64
+    }
+} 

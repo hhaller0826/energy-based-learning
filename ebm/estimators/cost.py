@@ -97,12 +97,13 @@ class SquaredError(CostFunction, QFunction):
         Returns the squared error between the output layer and the target
     """
 
-    def __init__(self, model,config,layer=None):
+    def __init__(self, model,layer=None):
         """Initializes an instance of SquaredError
 
         Args:
             layer (Layer): the layer playing the role of `output layer', or prediction
         """
+        config = model.config
         if layer is None:
             layer_num = config.output_layer
             layer = model._function.layers()[layer_num]

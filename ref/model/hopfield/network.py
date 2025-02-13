@@ -73,7 +73,8 @@ def create_edge(layers, interaction_type, indices, gain, shape=None, padding=0):
         raise ValueError("expected `bias', `dense', `conv_avg_pool', `conv_max_pool' or `conv_soft_pool' but got {}".format(interaction_type))
     
     return param, interaction
-
+class DeepHopfieldNetwork(Network):
+    
 
 
 class DeepHopfieldEnergy(SumSeparableFunction):

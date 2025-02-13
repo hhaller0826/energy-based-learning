@@ -19,7 +19,7 @@ class Network():
         Return the list of free layers (free to stabilize to equilibrium)
     """
 
-    def __init__(self, function):
+    def __init__(self, function,config):
         """Creates an instance of Network.
 
         Args:
@@ -27,15 +27,20 @@ class Network():
             idx_input_layer (int, optional): the index of the layer that plays the role of input layer. Default: 0
         """
 
-        self._function = function
+        self.function = function
 
-        self._input_layer = function.layers()[0]
+        self.input_layer = function.layers()[0]
 
-        self._free_layers = function.layers()[1:]
+        self.free_layers = [function.layers()[1:]]
 
-    def free_layers(self):
+        self.config = config
+
+
+    def change_free_layers(self,index):
         """Return the list of free layers"""
-        return self._free_layers
+        return self.free_layers
+
+    def change_clamped_layers(self):
 
     def set_input(self, input_values, reset=False):
         """Set the input layer to input values

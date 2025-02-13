@@ -1,10 +1,10 @@
 import numpy
-
-from model.function.interaction import SumSeparableFunction
-from model.variable.layer import InputLayer, LinearLayer
-from model.hopfield.layer import HardSigmoidLayer, SigmoidLayer, SoftMaxLayer, dSiLULayer
-from model.variable.parameter import Bias, DenseWeight, ConvWeight
-from model.hopfield.interaction import BiasInteraction, DenseHopfield, ConvAvgPoolHopfield, ConvMaxPoolHopfield, ConvSoftPoolHopfield, ModernHopfield
+from networks.util.network import Network
+from networks.interaction import SumSeparableFunction
+from networks.util.variable.layer import InputLayer, LinearLayer
+from networks.hopfield.layer import HardSigmoidLayer, SigmoidLayer, SoftMaxLayer, dSiLULayer
+from networks.util.variable.parameter import Bias, DenseWeight, ConvWeight
+from networks.hopfield.interaction import BiasInteraction, DenseHopfield, ConvAvgPoolHopfield, ConvMaxPoolHopfield, ConvSoftPoolHopfield, ModernHopfield
 
 
 
@@ -74,6 +74,16 @@ def create_edge(layers, interaction_type, indices, gain, shape=None, padding=0):
     
     return param, interaction
 
+class DeepHopfieldNetwork(Network):
+    def __init__(self, layer_shape, config):
+        """Creates an instance of a deep Hopfield network (DHN)
+
+        Args:
+            layer_shapes (list of tuple of ints): the shapes of the tensors representing the layers of the network
+            config (dict): configuration of the network
+        """
+        function = DeepHopfieldEnergy(layer_shape, config)
+        Network.__init__(self, function, function.config)
 
 
 class DeepHopfieldEnergy(SumSeparableFunction):
@@ -82,15 +92,26 @@ class DeepHopfieldEnergy(SumSeparableFunction):
     The underlying model consists of multiple layers. Successive layers are densely connected.
     """
 
-    def __init__(self, layer_shapes, weight_gains):
+    def __init__(self, layer_shape, config, weight_init_dist=None):
         """Creates an instance of a deep Hopfield network (DHN)
 
         Args:
             layer_shapes (list of tuple of ints): the shapes of the tensors representing the layers of the network
             weight_gains (list of float32): the gains of the weights used at initialization
         """
+        layer_shapes = []
+        for i in layer_shape: 
+            layer_shapes.append((i,))
 
         self._layer_shapes = layer_shapes
+        if weight_init_dist is None:
+            weight_init_dist = config.model['weight_init_dist']
+        num_hidden_layers = len(layer_shapes) - 2
+        weight_gains = [1.0] * (num_hidden_layers+1)
+        learning_rates_weights = list(np.linspace(0.2, 0.01, num_hidden_layers+1))
+        learning_rates_biases = list(np.linspace(0.2, 0.01, num_hidden_layers+1))
+        config.optimizer["learning_rates_weights"] = learning_rates_weights
+        config.optimizer["learning_rates_biases"] = learning_rates_biases
         self._weight_gains = weight_gains
 
         # shapes of the layers
@@ -114,6 +135,7 @@ class DeepHopfieldEnergy(SumSeparableFunction):
             
         params = biases[1:] + weights
         interactions = bias_interactions[1:] + weight_interactions
+        self.config = config
 
         # creates an instance of a SumSeparableFunction
         SumSeparableFunction.__init__(self, layers, params, interactions)
