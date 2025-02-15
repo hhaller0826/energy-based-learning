@@ -3,6 +3,8 @@ import torch
 from torch import Tensor
 from enum import Enum
 
+from scipy.stats import normaltest
+
 from ebm.networks.util.variable.layer import Layer
 from ebm.networks.util.variable.parameter import Parameter
 
@@ -38,3 +40,11 @@ def scale_magnitude(x: Tensor) -> Tensor:
         return torch.div(x,max)
 
     return x
+
+def lognormality_measure(data: Tensor):
+    '''
+    Given a tensor of data, return the probability that this data would be seen 
+    if it was pulled from a lognormal distribution.
+    '''
+    _, p = normaltest(torch.log(data))
+    return p
