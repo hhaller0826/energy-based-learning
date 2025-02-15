@@ -11,7 +11,8 @@
     "gradient_estimator":{
         "name": "equilibrium_propagation",
         "nudging": 0.2,
-        "variant": "centered"
+        "variant": "centered",
+        "use_alternative_formula": false
     },
     "cost_function":{
         "name": "squared_error",

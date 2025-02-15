@@ -23,7 +23,7 @@ class NetworkRunner:
       - eval(dataloader=None, verbose=False): Runs evaluation on the default evaluation dataloader
           (or on a provided one)
     """
-    def __init__ (self, model,optimizer,estimator, scheduler, train_dataloader, eval_dataloader,config,
+    def __init__ (self, model, estimator, optimizer, scheduler, train_dataloader, eval_dataloader,
         params=None, differentiator=None, energy_minimizer=None, path=None, use_tensorboard=True):
         """
         Initialize the ModelRunner with all the ingredients.
@@ -53,15 +53,15 @@ class NetworkRunner:
         self._params = self._network.params + self._cost_function.params()
 
         self._differentiator = estimator.gradient_estimator
-        self._cost_fn = estimator.cost_fn
+        self._cost_fn = estimator.cost_function
         self._optimizer = optimizer
         self._energy_minimizer = estimator.energy_minimizer
         self._scheduler = scheduler
         
         path = self._config.path
         self._path = datetime.now().strftime("%Y%m%d-%H%M%S") if path is None else path
-        self._use_tensorboard = self._config.use_tensorboard
-        if self._config.training['use_tensorboard']:
+        self._use_tensorboard = self._config.training["tensorboard"]
+        if self._config.training['tensorboard']:
             self._writer = SummaryWriter(self._path)
 
         self._epoch = 0
@@ -96,11 +96,11 @@ class NetworkRunner:
             TopFiveErrorStat(cost_fn),
         ]
         # Add statistics for each layer (e.g., norm and saturation)
-        stats_train_free += [NormStat(layer) for layer in network.layers()]
-        stats_train_free += [SaturationStat(layer) for layer in network.layers()]
+        stats_train_free += [NormStat(layer) for layer in network.layers]
+        stats_train_free += [SaturationStat(layer) for layer in network.layers]
 
         # Statistics to measure after computing the gradients (in training)
-        stats_train_grad = [GradientStat(param) for param in network.params()]
+        stats_train_grad = [GradientStat(param) for param in network.params]
 
         for stat in stats_train_free:
             self._add_statistic(stat, train=True, list_idx=0)
@@ -115,8 +115,8 @@ class NetworkRunner:
             ErrorStat(cost_fn),
             TopFiveErrorStat(cost_fn),
         ]
-        stats_eval += [NormStat(layer) for layer in network.layers()]
-        stats_eval += [SaturationStat(layer) for layer in network.layers()]
+        stats_eval += [NormStat(layer) for layer in network.layers]
+        stats_eval += [SaturationStat(layer) for layer in network.layers]
 
         for stat in stats_eval:
             self._add_statistic(stat, train=False)
@@ -206,7 +206,8 @@ class NetworkRunner:
         # Reset training statistics (both free-phase and gradient-phase)
         self._reset_statistics(train=True, list_idx=0)
         self._reset_statistics(train=True, list_idx=1)
-
+        self._energy_minimizer.num_iterations = self._config.minimizer['training_iterations'] 
+        self._energy_minimizer.mode = self._config.minimizer['training_mode']
         for x, y in self._train_loader:
             # --- Inference (free phase relaxation) ---
             # (Note: here we use reset=False so that the network’s state “carries over”
@@ -239,6 +240,8 @@ class NetworkRunner:
             dataloader = self._eval_loader
 
         self._reset_statistics(train=False)
+        self._energy_minimizer.num_iterations = self._config.minimizer['inference_iterations'] 
+        self._energy_minimizer.mode = self._config.minimizer['inference_mode']
         for batch in dataloader:
             # Depending on your dataloader, a batch may have three entries (x, y, idx)
             try:

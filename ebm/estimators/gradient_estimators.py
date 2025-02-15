@@ -12,8 +12,7 @@ def _get_cost_fnc(model, config):
         return SquaredError(model, config)
 
 def _get_augmented_fnc(model, config,cost_fnc):
-    if config.augmented_function['name'] == 'fixed_point':
-        return AugmentedFunction(model, cost_fnc)
+    return AugmentedFunction(model, cost_fnc)
 
 def _get_energy_minimizer(config, augmented_fnc, free_layers):
     if config.minimizer['name'] == 'fixed_point':
@@ -23,7 +22,7 @@ class EquiPropEstimator:
     def __init__(self, model, cost_fnc,  augmented_fnc=None, energy_minimizer=None):
         self.energy_fn = model.function
         config = model.config
-        
+
         if cost_fnc is None:
             self.cost_function = _get_cost_fnc(model, config)
         else:
@@ -33,12 +32,12 @@ class EquiPropEstimator:
         else:
             self.augmented_function = augmented_fnc
         if energy_minimizer is None:
-            self.energy_minimizer = _get_energy_minimizer(config, augmented_fnc, model.free_layers())
+            self.energy_minimizer = _get_energy_minimizer(config, self.augmented_function, model.free_layers())
         else:
             self.energy_minimizer = energy_minimizer
         self.free_layers = model.free_layers() 
         self.params = self.energy_fn.params() 
         self.layers = self.energy_fn.layers() 
-        self.gradient_estimator = EquilibriumProp(self.params, self.layers, self.augmented_fnc, self.cost_fnc, self.energy_minimizer) 
+        self.gradient_estimator = EquilibriumProp(self.params, self.layers, self.augmented_function, self.cost_function, self.energy_minimizer, config) 
 
 

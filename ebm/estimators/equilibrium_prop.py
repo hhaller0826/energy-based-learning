@@ -196,8 +196,8 @@ class EquilibriumProp(GradientEstimator):
 
         self._params = params
         self._layers = layers
-        nudging = config.nudging
-        variant = config.variant
+        nudging = config.gradient_estimator["nudging"]
+        variant = config.gradient_estimator["variant"]
         self._param_updaters = [ParamUpdater(param, energy_fn) for param in params]
         # self._param_updaters_cost = [ParamUpdater(param, cost_fn) for param in cost_fn.params()]
         self._layer_updaters = [GradientDescentUpdater(layer, energy_fn) for layer in layers]  # FIXME: one should be using the layer updaters of the energy minimizer
@@ -210,9 +210,7 @@ class EquilibriumProp(GradientEstimator):
         self._variant = variant
         self._set_nudgings()
 
-        self._use_alternative_formula = config.use_alternative_formula
-        self.num_iterations = config.num_iterations
-        self.mode = config.mode
+        self._use_alternative_formula = config.gradient_estimator["use_alternative_formula"]
 
     @property
     def nudging(self):

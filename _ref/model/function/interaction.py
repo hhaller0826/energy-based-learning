@@ -126,6 +126,7 @@ class Function(ABC):
 
         if variable.state.requires_grad == False:
             variable.state.requires_grad = True
+            print('Hola')
             value = torch.mean( self.eval() ) if mean else torch.sum( self.eval() )
             grad = torch.autograd.grad(value, variable.state)[0]
             variable.state.requires_grad = False
@@ -510,9 +511,15 @@ class SumSeparableFunction(Function):
         Returns:
             function that computes the gradient of the corresponding layer
         """
-
+        
         fns = [interaction.grad_layer_fn(layer) for interaction in self._interactions if layer in interaction.layers()]
-
+        fns_1 = []
+        for interaction in self._interactions:
+            itlayer = interaction.layers()
+            if layer in interaction.layers():
+                layerss = layer
+                fns_1.append(interaction.grad_layer_fn(layer))
+        print(layer)
         return lambda: sum([fn() for fn in fns])
 
     def grad_param_fn(self, param):
