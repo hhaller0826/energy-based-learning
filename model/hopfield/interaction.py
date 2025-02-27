@@ -1,6 +1,59 @@
 import torch
 import torch.nn.functional as F
 
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from typing import Optional, List, Tuple
+
+import torch
+import torch.nn as nn
+from typing import Optional, List, Tuple, Union
+
+class MaxUnpool2d(nn.Module):
+    def __init__(
+        self,
+        kernel_size: Union[int, Tuple[int, int]],
+        stride: Optional[Union[int, Tuple[int, int]]] = None,
+        padding: Union[int, Tuple[int, int]] = (0, 0),
+    ) -> None:
+        super().__init__()
+
+        # Ensure kernel_size, stride, and padding are tuples
+        if isinstance(kernel_size, int):
+            kernel_size = (kernel_size, kernel_size)
+        if isinstance(stride, int) or stride is None:
+            stride = kernel_size if stride is None else (stride, stride)
+        if isinstance(padding, int):
+            padding = (padding, padding)
+
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.padding = padding
+
+    def forward(
+        self, input: torch.Tensor, indices: torch.Tensor, output_size: Optional[List[int]] = None
+    ) -> torch.Tensor:
+        if output_size is None:
+            output_size = [
+                input.shape[0],  # Batch size
+                input.shape[1],  # Channels
+                (input.shape[2] - 1) * self.stride[0] - 2 * self.padding[0] + self.kernel_size[0],
+                (input.shape[3] - 1) * self.stride[1] - 2 * self.padding[1] + self.kernel_size[1],
+            ]
+
+        # Create an empty tensor for output
+        output = torch.zeros(output_size, device=input.device, dtype=input.dtype)
+
+        # Scatter max pooled values back to their positions
+        output.view(output.shape[0], output.shape[1], -1).scatter_(
+            2, indices.view(indices.shape[0], indices.shape[1], -1), input.view(input.shape[0], input.shape[1], -1)
+        )
+
+        return output
+
+
+
 from model.function.interaction import Function 
 
 
@@ -336,7 +389,9 @@ class ConvMaxPoolHopfield(Function):
         layer_pre = self._layer_pre.state
         _, indices = F.max_pool2d(F.conv2d(layer_pre, self._weight.get(), padding=self._padding), 2, return_indices=True)
         layer_post = self._layer_post.state
-        layer_post = F.max_unpool2d(layer_post, indices, 2)  # unpooling operation
+        # layer_post = F.interpolate(layer_post, scale_factor=2, mode='nearest')
+        unpool = MaxUnpool2d(kernel_size=2, stride=2)
+        layer_post = unpool(layer_post, indices)  # unpooling operation
         return - F.conv_transpose2d(layer_post, self._weight.get(), padding=self._padding)
 
     def _grad_post(self):
@@ -360,7 +415,10 @@ class ConvMaxPoolHopfield(Function):
         _, indices = F.max_pool2d(F.conv2d(layer_pre, self._weight.get(), padding=self._padding), 2, return_indices=True)
 
         layer_post = self._layer_post.state
-        layer_post = F.max_unpool2d(layer_post, indices, 2)  # unpooling operation
+
+        unpool = MaxUnpool2d(kernel_size=2, stride=2)
+        # layer_post = F.interpolate(layer_post, scale_factor=2, mode='nearest')
+        layer_post = unpool(layer_post, indices)  # unpooling operation
 
         batch_size = layer_pre.shape[0]
 
